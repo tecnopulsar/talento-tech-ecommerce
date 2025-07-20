@@ -12,6 +12,7 @@ import Admin from './components/Admin';
 import Login from './components/Login';
 import CartPage from './components/CartPage';
 import GestionProductos from './components/GestionProductos';
+import TestMockAPI from './components/TestMockAPI';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -49,6 +50,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <GestionProductos />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/test-mockapi"
+                element={
+                  <ProtectedRoute>
+                    <TestMockAPI />
                   </ProtectedRoute>
                 }
               />

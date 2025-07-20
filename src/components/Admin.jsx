@@ -1,127 +1,83 @@
 import { useAuthContext } from '../context/AuthContext';
-import { authService } from '../services/authService';
 import { Link } from 'react-router-dom';
 
 export default function Admin() {
-    const { user } = useAuthContext();
-    const currentToken = authService.getToken();
+    const { user, token } = useAuthContext();
 
     return (
         <div style={{
-            maxWidth: '1200px',
+            maxWidth: '800px',
             margin: '0 auto',
             padding: '2rem'
         }}>
             <h1 style={{ color: '#333', marginBottom: '2rem' }}>
-                Panel de Administración
+                🛡️ Panel de Administración
             </h1>
 
-            {/* Información del Token */}
             <div style={{
-                backgroundColor: '#e3f2fd',
-                padding: '1rem',
+                backgroundColor: '#f8f9fa',
+                padding: '2rem',
                 borderRadius: '8px',
-                marginBottom: '2rem',
-                border: '1px solid #2196f3'
+                border: '1px solid #dee2e6',
+                marginBottom: '2rem'
             }}>
-                <h3 style={{ color: '#1976d2', marginBottom: '0.5rem' }}>
-                    Información de Autenticación
+                <h3 style={{ color: '#333', marginBottom: '1rem' }}>
+                    Información del Usuario
                 </h3>
-                <p style={{ margin: '0.5rem 0', fontSize: '0.9rem' }}>
-                    <strong>Usuario:</strong> {user}
-                </p>
-                <p style={{ margin: '0.5rem 0', fontSize: '0.9rem' }}>
-                    <strong>Token actual:</strong> {currentToken}
-                </p>
-                <p style={{ margin: '0.5rem 0', fontSize: '0.9rem' }}>
-                    <strong>Estado:</strong> Autenticado ✅
-                </p>
+                <p><strong>Usuario:</strong> {user}</p>
+                <p><strong>Token:</strong> {token}</p>
+                <p><strong>Estado:</strong> <span style={{ color: '#28a745' }}>✅ Autenticado</span></p>
             </div>
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '2rem'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '1rem',
+                marginBottom: '2rem'
             }}>
-                <div style={{
-                    backgroundColor: '#f8f9fa',
+                <Link to="/gestion-productos" style={{
+                    display: 'block',
                     padding: '1.5rem',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    textDecoration: 'none',
                     borderRadius: '8px',
-                    border: '1px solid #dee2e6'
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    transition: 'background-color 0.2s'
                 }}>
-                    <h3 style={{ color: '#333', marginBottom: '1rem' }}>
-                        Gestión de Productos
-                    </h3>
-                    <p style={{ color: '#666' }}>
-                        Aquí puedes agregar, editar o eliminar productos del catálogo.
-                    </p>
-                    <Link
-                        to="/gestion-productos"
-                        style={{
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            marginTop: '1rem',
-                            textDecoration: 'none',
-                            display: 'inline-block'
-                        }}
-                    >
-                        Gestionar Productos
-                    </Link>
-                </div>
+                    📦 Gestionar Productos
+                </Link>
 
-                <div style={{
-                    backgroundColor: '#f8f9fa',
+                <Link to="/test-mockapi" style={{
+                    display: 'block',
                     padding: '1.5rem',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    textDecoration: 'none',
                     borderRadius: '8px',
-                    border: '1px solid #dee2e6'
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    transition: 'background-color 0.2s'
                 }}>
-                    <h3 style={{ color: '#333', marginBottom: '1rem' }}>
-                        Pedidos
-                    </h3>
-                    <p style={{ color: '#666' }}>
-                        Revisa y gestiona los pedidos de los clientes.
-                    </p>
-                    <button style={{
-                        backgroundColor: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        marginTop: '1rem'
-                    }}>
-                        Ver Pedidos
-                    </button>
-                </div>
+                    🧪 Probar MockAPI
+                </Link>
+            </div>
 
-                <div style={{
-                    backgroundColor: '#f8f9fa',
-                    padding: '1.5rem',
-                    borderRadius: '8px',
-                    border: '1px solid #dee2e6'
-                }}>
-                    <h3 style={{ color: '#333', marginBottom: '1rem' }}>
-                        Estadísticas
-                    </h3>
-                    <p style={{ color: '#666' }}>
-                        Revisa las estadísticas de ventas y visitas.
-                    </p>
-                    <button style={{
-                        backgroundColor: '#ffc107',
-                        color: 'black',
-                        border: 'none',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        marginTop: '1rem'
-                    }}>
-                        Ver Estadísticas
-                    </button>
-                </div>
+            <div style={{
+                backgroundColor: '#e3f2fd',
+                padding: '1rem',
+                borderRadius: '4px',
+                border: '1px solid #2196f3'
+            }}>
+                <h4 style={{ color: '#1976d2', marginBottom: '0.5rem' }}>
+                    🔧 Funciones Disponibles
+                </h4>
+                <ul style={{ color: '#1976d2', fontSize: '0.9rem' }}>
+                    <li><strong>Gestionar Productos:</strong> Agregar, editar y eliminar productos</li>
+                    <li><strong>Probar MockAPI:</strong> Verificar conexión con la API</li>
+                    <li><strong>Ver Carrito:</strong> Gestionar productos en el carrito</li>
+                </ul>
             </div>
         </div>
     );

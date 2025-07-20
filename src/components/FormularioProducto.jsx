@@ -9,6 +9,7 @@ function FormularioProducto({ onAgregar, onEditar, productoParaEditar = null, mo
 
     const [errores, setErrores] = useState({});
     const [loading, setLoading] = useState(false);
+    const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
 
     // Cargar datos del producto si estamos en modo editar
     useEffect(() => {
@@ -55,19 +56,31 @@ function FormularioProducto({ onAgregar, onEditar, productoParaEditar = null, mo
 
         if (validarFormulario()) {
             setLoading(true);
+            setMensaje({ tipo: '', texto: '' });
+
             try {
+                let result;
                 if (modo === 'editar' && productoParaEditar) {
-                    await onEditar(productoParaEditar.id, producto);
+                    result = await onEditar(productoParaEditar.id, producto);
                 } else {
-                    await onAgregar(producto);
+                    result = await onAgregar(producto);
                 }
 
-                // Solo limpiar si es modo agregar
-                if (modo === 'agregar') {
+                setMensaje({
+                    tipo: result.success ? 'exito' : 'error',
+                    texto: result.message
+                });
+
+                // Solo limpiar si es modo agregar y fue exitoso
+                if (modo === 'agregar' && result.success) {
                     setProducto({ nombre: '', precio: '', descripcion: '' });
                 }
                 setErrores({});
             } catch (error) {
+                setMensaje({
+                    tipo: 'error',
+                    texto: 'Error inesperado al procesar el producto'
+                });
                 console.error('Error al procesar producto:', error);
             } finally {
                 setLoading(false);
@@ -77,7 +90,7 @@ function FormularioProducto({ onAgregar, onEditar, productoParaEditar = null, mo
 
     const titulo = modo === 'editar' ? 'Editar Producto' : 'Agregar Producto';
     const textoBoton = loading
-        ? (modo === 'editar' ? 'Editando producto...' : 'Agregando producto...')
+        ? (modo === 'editar' ? 'Editando en MockAPI...' : 'Agregando a MockAPI...')
         : (modo === 'editar' ? 'Editar Producto' : 'Agregar Producto');
 
     return (
@@ -96,6 +109,21 @@ function FormularioProducto({ onAgregar, onEditar, productoParaEditar = null, mo
             }}>
                 {titulo}
             </h2>
+
+            {/* Mensaje de estado */}
+            {mensaje.tipo && (
+                <div style={{
+                    padding: '1rem',
+                    marginBottom: '1.5rem',
+                    borderRadius: '4px',
+                    backgroundColor: mensaje.tipo === 'exito' ? '#d4edda' : '#f8d7da',
+                    color: mensaje.tipo === 'exito' ? '#155724' : '#721c24',
+                    border: `1px solid ${mensaje.tipo === 'exito' ? '#c3e6cb' : '#f5c6cb'}`,
+                    fontSize: '0.9rem'
+                }}>
+                    <strong>{mensaje.tipo === 'exito' ? '✅ Éxito:' : '❌ Error:'}</strong> {mensaje.texto}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit}>
                 <div style={{ marginBottom: '1.5rem' }}>
@@ -239,6 +267,23 @@ function FormularioProducto({ onAgregar, onEditar, productoParaEditar = null, mo
                     {textoBoton}
                 </button>
             </form>
+
+            {/* Información sobre MockAPI */}
+            <div style={{
+                marginTop: '2rem',
+                padding: '1rem',
+                backgroundColor: '#e3f2fd',
+                borderRadius: '4px',
+                border: '1px solid #2196f3'
+            }}>
+                <h4 style={{ color: '#1976d2', marginBottom: '0.5rem' }}>
+                    📡 Conexión con MockAPI
+                </h4>
+                <p style={{ color: '#1976d2', fontSize: '0.9rem', margin: 0 }}>
+                    Los productos se guardan en: <br />
+                    <strong>https://683c529028a0b0f2fdc6cd58.mockapi.io/api/products/wilson</strong>
+                </p>
+            </div>
         </div>
     );
 }
