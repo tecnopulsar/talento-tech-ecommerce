@@ -1,5 +1,6 @@
 import { useAuthContext } from '../context/AuthContext';
 import { authService } from '../services/authService';
+import { Link } from 'react-router-dom';
 
 export default function Admin() {
     const { user } = useAuthContext();
@@ -54,17 +55,22 @@ export default function Admin() {
                     <p style={{ color: '#666' }}>
                         Aquí puedes agregar, editar o eliminar productos del catálogo.
                     </p>
-                    <button style={{
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        marginTop: '1rem'
-                    }}>
+                    <Link
+                        to="/gestion-productos"
+                        style={{
+                            backgroundColor: '#007bff',
+                            color: 'white',
+                            border: 'none',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            marginTop: '1rem',
+                            textDecoration: 'none',
+                            display: 'inline-block'
+                        }}
+                    >
                         Gestionar Productos
-                    </button>
+                    </Link>
                 </div>
 
                 <div style={{

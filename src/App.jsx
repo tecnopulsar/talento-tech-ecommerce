@@ -10,6 +10,7 @@ import Contact from './components/Contact';
 import Admin from './components/Admin';
 import Login from './components/Login';
 import CartPage from './components/CartPage';
+import GestionProductos from './components/GestionProductos';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -38,6 +39,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gestion-productos"
+              element={
+                <ProtectedRoute>
+                  <GestionProductos />
                 </ProtectedRoute>
               }
             />

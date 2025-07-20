@@ -1,11 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useCarritoContext } from '../context/CarritoContext';
 
 export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { agregarProducto } = useCarritoContext();
 
     useEffect(() => {
         // Simular carga de datos
@@ -22,8 +24,10 @@ export default function ProductDetail() {
     }, [id]);
 
     const handleAddToCart = () => {
-        // Aquí podrías agregar la lógica del carrito
-        alert('Producto agregado al carrito');
+        if (product) {
+            agregarProducto(product);
+            alert('Producto agregado al carrito');
+        }
     };
 
     if (loading) return <div>Cargando producto...</div>;
