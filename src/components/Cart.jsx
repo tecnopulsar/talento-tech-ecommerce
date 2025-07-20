@@ -1,5 +1,15 @@
-export default function Cart({ cart, onRemoveItem, onIncreaseQuantity, onDecreaseQuantity, onClearCart }) {
-  const total = cart.reduce((sum, item) => sum + (parseFloat(item.precio || 0) * item.quantity), 0);
+export default function Cart({ carrito, onRemoveItem, onIncreaseQuantity, onDecreaseQuantity, onClearCart, onGuardarCarrito, onCargarCarrito }) {
+  const total = carrito.reduce((sum, item) => sum + (parseFloat(item.precio || 0) * item.cantidad), 0);
+
+  const handleGuardarCarrito = () => {
+    const result = onGuardarCarrito();
+    alert(result.message);
+  };
+
+  const handleCargarCarrito = () => {
+    const result = onCargarCarrito();
+    alert(result.message);
+  };
 
   return (
     <div style={{
@@ -10,11 +20,11 @@ export default function Cart({ cart, onRemoveItem, onIncreaseQuantity, onDecreas
     }}>
       <h2>Carrito</h2>
 
-      {cart.length === 0 ? (
+      {carrito.length === 0 ? (
         <p>El carrito está vacío</p>
       ) : (
         <>
-          {cart.map((item) => (
+          {carrito.map((item) => (
             <div key={item.id} style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -24,7 +34,7 @@ export default function Cart({ cart, onRemoveItem, onIncreaseQuantity, onDecreas
             }}>
               <div>
                 <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                <div>${item.precio} x {item.quantity}</div>
+                <div>${item.precio} x {item.cantidad}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <button
@@ -42,7 +52,7 @@ export default function Cart({ cart, onRemoveItem, onIncreaseQuantity, onDecreas
                   -
                 </button>
                 <span style={{ minWidth: '20px', textAlign: 'center' }}>
-                  {item.quantity}
+                  {item.cantidad}
                 </span>
                 <button
                   onClick={() => onIncreaseQuantity(item.id)}
@@ -90,6 +100,41 @@ export default function Cart({ cart, onRemoveItem, onIncreaseQuantity, onDecreas
             }}>
               <span>Total:</span>
               <span>${total}</span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              gap: '0.5rem',
+              marginBottom: '1rem'
+            }}>
+              <button
+                onClick={handleGuardarCarrito}
+                style={{
+                  backgroundColor: '#17a2b8',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '0.5rem 1rem',
+                  cursor: 'pointer',
+                  flex: 1
+                }}
+              >
+                💾 Guardar
+              </button>
+              <button
+                onClick={handleCargarCarrito}
+                style={{
+                  backgroundColor: '#6f42c1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '0.5rem 1rem',
+                  cursor: 'pointer',
+                  flex: 1
+                }}
+              >
+                📂 Cargar
+              </button>
             </div>
 
             <button
