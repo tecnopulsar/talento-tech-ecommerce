@@ -14,12 +14,19 @@ import CartPage from './components/CartPage';
 import GestionProductos from './components/GestionProductos';
 import TestMockAPI from './components/TestMockAPI';
 import ProtectedRoute from './components/ProtectedRoute';
+import ToastContainer from './components/ToastContainer';
+import SEO from './components/SEO';
 
 function App() {
   return (
     <AuthProvider>
       <ProductsProvider>
         <CarritoProvider>
+          <SEO
+            title="Wilson Store - Productos de Tenis"
+            description="Tienda online de productos de tenis Wilson. Raquetas, pelotas, accesorios y más. Envío gratis en compras superiores a $50."
+            keywords="tenis, raquetas, wilson, pelotas, accesorios, deportes, ecommerce"
+          />
           <div>
             <Navbar />
             <Routes>
@@ -62,6 +69,7 @@ function App() {
                 }
               />
             </Routes>
+            <ToastContainer />
           </div>
         </CarritoProvider>
       </ProductsProvider>

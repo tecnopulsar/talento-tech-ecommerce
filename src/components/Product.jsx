@@ -5,9 +5,9 @@ import { useCarritoContext } from '../context/CarritoContext';
 export default function Product() {
     const {
         carrito,
-        eliminarProducto,
-        aumentarCantidad,
-        disminuirCantidad,
+        removerProducto,
+        incrementarCantidad,
+        decrementarCantidad,
         vaciarCarrito,
         guardarCarrito,
         cargarCarrito
@@ -43,9 +43,9 @@ export default function Product() {
                 }}>
                     <Cart
                         carrito={carrito}
-                        onRemoveItem={eliminarProducto}
-                        onIncreaseQuantity={aumentarCantidad}
-                        onDecreaseQuantity={disminuirCantidad}
+                        onRemoveItem={removerProducto}
+                        onIncreaseQuantity={incrementarCantidad}
+                        onDecreaseQuantity={decrementarCantidad}
                         onClearCart={vaciarCarrito}
                         onGuardarCarrito={guardarCarrito}
                         onCargarCarrito={cargarCarrito}

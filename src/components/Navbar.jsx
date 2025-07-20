@@ -1,167 +1,78 @@
 import { Link } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { useCarritoContext } from '../context/CarritoContext';
+import { FaShoppingCart, FaUser, FaSignOutAlt, FaSignInAlt, FaHome, FaTableTennis, FaInfoCircle, FaEnvelope } from 'react-icons/fa';
+import './Navbar.css';
 
 export default function Navbar() {
-    const { user, isAuthenticated, logout } = useAuthContext();
-    const { obtenerCantidadTotal } = useCarritoContext();
-    const cantidadCarrito = obtenerCantidadTotal();
+    const { user, logout } = useAuthContext();
+    const { carrito } = useCarritoContext();
+
+    const totalItems = carrito.reduce((total, item) => total + item.cantidad, 0);
 
     return (
-        <nav style={{
-            padding: '1rem',
-            backgroundColor: '#f8f9fa',
-            borderBottom: '1px solid #dee2e6',
-            marginBottom: '2rem'
-        }}>
-            <div style={{
-                display: 'flex',
-                gap: '2rem',
-                alignItems: 'center',
-                maxWidth: '1200px',
-                margin: '0 auto'
-            }}>
-                <h2 style={{ margin: 0, color: '#333' }}>Tienda Wilson</h2>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <Link
-                        to="/"
-                        style={{
-                            textDecoration: 'none',
-                            color: '#007bff',
-                            fontWeight: '500',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
-                            transition: 'background-color 0.2s'
-                        }}
-                    >
-                        Inicio
+        <nav className="navbar">
+            <div className="navbar-container">
+                {/* Logo */}
+                <Link to="/" className="navbar-logo">
+                    <FaTableTennis size={24} />
+                    <span>Wilson Store</span>
+                </Link>
+
+                {/* Navegación principal */}
+                <div className="navbar-nav">
+                    <Link to="/" className="nav-link" aria-label="Ir al inicio">
+                        <FaHome size={16} />
+                        <span className="nav-text">Inicio</span>
                     </Link>
-                    <Link
-                        to="/productos"
-                        style={{
-                            textDecoration: 'none',
-                            color: '#007bff',
-                            fontWeight: '500',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
-                            transition: 'background-color 0.2s'
-                        }}
-                    >
-                        Productos
+
+                    <Link to="/productos" className="nav-link" aria-label="Ver productos">
+                        <FaTableTennis size={16} />
+                        <span className="nav-text">Productos</span>
                     </Link>
-                    <Link
-                        to="/about"
-                        style={{
-                            textDecoration: 'none',
-                            color: '#007bff',
-                            fontWeight: '500',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
-                            transition: 'background-color 0.2s'
-                        }}
-                    >
-                        Nosotros
+
+                    <Link to="/about" className="nav-link" aria-label="Acerca de nosotros">
+                        <FaInfoCircle size={16} />
+                        <span className="nav-text">Acerca</span>
                     </Link>
-                    <Link
-                        to="/contact"
-                        style={{
-                            textDecoration: 'none',
-                            color: '#007bff',
-                            fontWeight: '500',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
-                            transition: 'background-color 0.2s'
-                        }}
-                    >
-                        Contacto
+
+                    <Link to="/contact" className="nav-link" aria-label="Contacto">
+                        <FaEnvelope size={16} />
+                        <span className="nav-text">Contacto</span>
                     </Link>
                 </div>
 
-                <div style={{ marginLeft: 'auto', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    {isAuthenticated && (
-                        <>
-                            <span style={{
-                                color: '#28a745',
-                                fontWeight: '500',
-                                fontSize: '0.9rem'
-                            }}>
-                                Hola, {user}!
+                {/* Carrito y Usuario */}
+                <div className="navbar-actions">
+                    <Link to="/carrito" className="nav-link cart-link" aria-label={`Ver carrito con ${totalItems} productos`}>
+                        <FaShoppingCart size={18} />
+                        {totalItems > 0 && (
+                            <span className="cart-badge">
+                                {totalItems}
                             </span>
-                            <Link
-                                to="/carrito"
-                                style={{
-                                    textDecoration: 'none',
-                                    color: '#ffc107',
-                                    fontWeight: '500',
-                                    padding: '0.5rem 1rem',
-                                    borderRadius: '4px',
-                                    transition: 'background-color 0.2s',
-                                    position: 'relative'
-                                }}
-                            >
-                                🛒 Carrito
-                                {cantidadCarrito > 0 && (
-                                    <span style={{
-                                        position: 'absolute',
-                                        top: '-8px',
-                                        right: '-8px',
-                                        backgroundColor: '#dc3545',
-                                        color: 'white',
-                                        borderRadius: '50%',
-                                        width: '20px',
-                                        height: '20px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '0.7rem',
-                                        fontWeight: 'bold'
-                                    }}>
-                                        {cantidadCarrito}
-                                    </span>
-                                )}
-                            </Link>
-                            <Link
-                                to="/admin"
-                                style={{
-                                    textDecoration: 'none',
-                                    color: '#28a745',
-                                    fontWeight: '500',
-                                    padding: '0.5rem 1rem',
-                                    borderRadius: '4px',
-                                    transition: 'background-color 0.2s'
-                                }}
-                            >
-                                Admin
-                            </Link>
+                        )}
+                        <span className="nav-text">Carrito</span>
+                    </Link>
+
+                    {user ? (
+                        <div className="user-section">
+                            <span className="user-info">
+                                <FaUser size={16} />
+                                <span className="nav-text">{user}</span>
+                            </span>
                             <button
                                 onClick={logout}
-                                style={{
-                                    backgroundColor: '#dc3545',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '0.5rem 1rem',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
+                                className="nav-button"
+                                aria-label="Cerrar sesión"
                             >
-                                Cerrar Sesión
+                                <FaSignOutAlt size={16} />
+                                <span className="nav-text">Salir</span>
                             </button>
-                        </>
-                    )}
-
-                    {!isAuthenticated && (
-                        <Link
-                            to="/login"
-                            style={{
-                                textDecoration: 'none',
-                                color: '#007bff',
-                                fontWeight: '500',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '4px',
-                                transition: 'background-color 0.2s'
-                            }}
-                        >
-                            Iniciar Sesión
+                        </div>
+                    ) : (
+                        <Link to="/login" className="nav-link login-link" aria-label="Iniciar sesión">
+                            <FaSignInAlt size={16} />
+                            <span className="nav-text">Login</span>
                         </Link>
                     )}
                 </div>

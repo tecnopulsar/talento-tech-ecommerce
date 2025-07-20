@@ -1,6 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
-// Crear el contexto de productos
 const ProductsContext = createContext();
 
 export function ProductsProvider({ children }) {
@@ -8,165 +7,135 @@ export function ProductsProvider({ children }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Cargar productos desde la API
-    const cargarProductos = async () => {
+    // Función para cargar productos con mejor manejo de errores
+    const loadProducts = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            const response = await fetch('https://683c529028a0b0f2fdc6cd58.mockapi.io/api/products/wilson');
+            const response = await fetch('https://64c8c4a1dbb0a235bb9c7831.mockapi.io/products');
 
             if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
+                throw new Error(`Error HTTP: ${response.status}`);
             }
 
             const data = await response.json();
+
+            // Validar que los datos sean un array
+            if (!Array.isArray(data)) {
+                throw new Error('Formato de datos inválido');
+            }
+
             setProducts(data);
-        } catch (error) {
-            console.error('Error cargando productos:', error);
-            setError(`Error al cargar los productos: ${error.message}`);
+        } catch (err) {
+            console.error('Error cargando productos:', err);
+            setError(err.message || 'Error al cargar productos');
+
+            // Cargar datos de respaldo si hay error
+            try {
+                const fallbackData = await import('../database/productos.json');
+                setProducts(fallbackData.default || []);
+                setError(null);
+            } catch (fallbackErr) {
+                console.error('Error cargando datos de respaldo:', fallbackErr);
+                setProducts([]);
+            }
         } finally {
             setLoading(false);
         }
-    };
-
-    // Cargar productos al iniciar
-    useEffect(() => {
-        cargarProductos();
     }, []);
 
-    // Agregar producto
-    const agregarProducto = async (producto) => {
+    // Función para agregar producto
+    const addProduct = useCallback(async (productData) => {
         try {
-            console.log('Enviando producto a MockAPI:', producto);
-
-            const response = await fetch('https://683c529028a0b0f2fdc6cd58.mockapi.io/api/products/wilson', {
+            const response = await fetch('https://64c8c4a1dbb0a235bb9c7831.mockapi.io/products', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    name: producto.nombre,
-                    precio: producto.precio,
-                    descripcion: producto.descripcion,
-                    marca: 'Wilson',
-                    imagen: 'not found',
-                    stock: '5'
-                }),
+                body: JSON.stringify(productData),
             });
 
             if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Error ${response.status}: ${response.statusText}. ${errorData}`);
+                throw new Error(`Error HTTP: ${response.status}`);
             }
 
-            const nuevoProducto = await response.json();
-            console.log('Producto agregado exitosamente:', nuevoProducto);
+            const newProduct = await response.json();
+            setProducts(prev => [...prev, newProduct]);
 
-            setProducts([...products, nuevoProducto]);
-
-            return {
-                success: true,
-                message: `Producto "${producto.nombre}" agregado correctamente a MockAPI`
-            };
+            return { success: true, message: 'Producto agregado exitosamente' };
         } catch (error) {
             console.error('Error agregando producto:', error);
-            return {
-                success: false,
-                message: `Error al agregar el producto: ${error.message}`
-            };
+            return { success: false, message: error.message || 'Error al agregar producto' };
         }
-    };
+    }, []);
 
-    // Editar producto
-    const editarProducto = async (id, producto) => {
+    // Función para actualizar producto
+    const updateProduct = useCallback(async (id, productData) => {
         try {
-            console.log('Editando producto en MockAPI:', { id, producto });
-
-            const response = await fetch(`https://683c529028a0b0f2fdc6cd58.mockapi.io/api/products/wilson/${id}`, {
+            const response = await fetch(`https://64c8c4a1dbb0a235bb9c7831.mockapi.io/products/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    name: producto.nombre,
-                    precio: producto.precio,
-                    descripcion: producto.descripcion,
-                    marca: 'Wilson',
-                    imagen: 'not found',
-                    stock: '5'
-                }),
+                body: JSON.stringify(productData),
             });
 
             if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Error ${response.status}: ${response.statusText}. ${errorData}`);
+                throw new Error(`Error HTTP: ${response.status}`);
             }
 
-            const productoEditado = await response.json();
-            console.log('Producto editado exitosamente:', productoEditado);
+            const updatedProduct = await response.json();
+            setProducts(prev => prev.map(product =>
+                product.id === id ? updatedProduct : product
+            ));
 
-            setProducts(products.map(p => p.id === id ? productoEditado : p));
-
-            return {
-                success: true,
-                message: `Producto "${producto.nombre}" editado correctamente en MockAPI`
-            };
+            return { success: true, message: 'Producto actualizado exitosamente' };
         } catch (error) {
-            console.error('Error editando producto:', error);
-            return {
-                success: false,
-                message: `Error al editar el producto: ${error.message}`
-            };
+            console.error('Error actualizando producto:', error);
+            return { success: false, message: error.message || 'Error al actualizar producto' };
         }
-    };
+    }, []);
 
-    // Eliminar producto
-    const eliminarProducto = async (id) => {
+    // Función para eliminar producto
+    const deleteProduct = useCallback(async (id) => {
         try {
-            const productoAEliminar = products.find(p => p.id === id);
-            console.log('Eliminando producto de MockAPI:', productoAEliminar);
-
-            const response = await fetch(`https://683c529028a0b0f2fdc6cd58.mockapi.io/api/products/wilson/${id}`, {
+            const response = await fetch(`https://64c8c4a1dbb0a235bb9c7831.mockapi.io/products/${id}`, {
                 method: 'DELETE',
             });
 
             if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`Error ${response.status}: ${response.statusText}. ${errorData}`);
+                throw new Error(`Error HTTP: ${response.status}`);
             }
 
-            console.log('Producto eliminado exitosamente de MockAPI');
-            setProducts(products.filter(p => p.id !== id));
+            setProducts(prev => prev.filter(product => product.id !== id));
 
-            return {
-                success: true,
-                message: `Producto "${productoAEliminar?.name || 'desconocido'}" eliminado correctamente de MockAPI`
-            };
+            return { success: true, message: 'Producto eliminado exitosamente' };
         } catch (error) {
             console.error('Error eliminando producto:', error);
-            return {
-                success: false,
-                message: `Error al eliminar el producto: ${error.message}`
-            };
+            return { success: false, message: error.message || 'Error al eliminar producto' };
         }
-    };
+    }, []);
 
-    // Obtener producto por ID
-    const obtenerProductoPorId = (id) => {
-        return products.find(p => p.id === id);
-    };
+    // Función para recargar productos
+    const refreshProducts = useCallback(() => {
+        loadProducts();
+    }, [loadProducts]);
+
+    // Cargar productos al montar el componente
+    useEffect(() => {
+        loadProducts();
+    }, [loadProducts]);
 
     return (
         <ProductsContext.Provider value={{
             products,
             loading,
             error,
-            agregarProducto,
-            editarProducto,
-            eliminarProducto,
-            obtenerProductoPorId,
-            cargarProductos
+            addProduct,
+            updateProduct,
+            deleteProduct,
+            refreshProducts
         }}>
             {children}
         </ProductsContext.Provider>

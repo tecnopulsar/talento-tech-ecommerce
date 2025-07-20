@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
-// Crear el contexto del carrito
 const CarritoContext = createContext();
 
 export function CarritoProvider({ children }) {
@@ -13,117 +13,220 @@ export function CarritoProvider({ children }) {
             try {
                 setCarrito(JSON.parse(carritoGuardado));
             } catch (error) {
-                console.error('Error al cargar el carrito:', error);
-                localStorage.removeItem('carrito');
+                console.error('Error cargando carrito:', error);
+                setCarrito([]);
             }
         }
     }, []);
 
-    // Guardar carrito en localStorage cada vez que cambie
+    // Guardar carrito en localStorage cuando cambie
     useEffect(() => {
         localStorage.setItem('carrito', JSON.stringify(carrito));
     }, [carrito]);
 
-    // Agregar producto al carrito
     const agregarProducto = (producto) => {
-        const productoExistente = carrito.find(item => item.id === producto.id);
+        setCarrito(prevCarrito => {
+            const productoExistente = prevCarrito.find(item => item.id === producto.id);
 
-        if (productoExistente) {
-            // Si el producto ya existe, aumentar cantidad
-            setCarrito(carrito.map(item =>
-                item.id === producto.id
+            if (productoExistente) {
+                // Si el producto ya existe, incrementar cantidad
+                const carritoActualizado = prevCarrito.map(item =>
+                    item.id === producto.id
+                        ? { ...item, cantidad: item.cantidad + 1 }
+                        : item
+                );
+
+                toast.success(`✅ ${producto.name} agregado al carrito (${productoExistente.cantidad + 1} unidades)`, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+
+                return carritoActualizado;
+            } else {
+                // Si es un producto nuevo, agregarlo
+                const nuevoProducto = {
+                    ...producto,
+                    cantidad: 1
+                };
+
+                toast.success(`✅ ${producto.name} agregado al carrito`, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+
+                return [...prevCarrito, nuevoProducto];
+            }
+        });
+    };
+
+    const removerProducto = (id) => {
+        setCarrito(prevCarrito => {
+            const producto = prevCarrito.find(item => item.id === id);
+            const carritoActualizado = prevCarrito.filter(item => item.id !== id);
+
+            toast.info(`🗑️ ${producto?.name || 'Producto'} removido del carrito`, {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+
+            return carritoActualizado;
+        });
+    };
+
+    const incrementarCantidad = (id) => {
+        setCarrito(prevCarrito => {
+            const carritoActualizado = prevCarrito.map(item =>
+                item.id === id
                     ? { ...item, cantidad: item.cantidad + 1 }
                     : item
-            ));
-        } else {
-            // Si es nuevo, agregar con cantidad 1
-            setCarrito([...carrito, { ...producto, cantidad: 1 }]);
-        }
+            );
+
+            const producto = carritoActualizado.find(item => item.id === id);
+            toast.success(`➕ ${producto.name} (${producto.cantidad} unidades)`, {
+                position: "top-right",
+                autoClose: 1500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+
+            return carritoActualizado;
+        });
     };
 
-    // Eliminar producto del carrito
-    const eliminarProducto = (productoId) => {
-        setCarrito(carrito.filter(item => item.id !== productoId));
-    };
+    const decrementarCantidad = (id) => {
+        setCarrito(prevCarrito => {
+            const producto = prevCarrito.find(item => item.id === id);
 
-    // Aumentar cantidad de un producto
-    const aumentarCantidad = (productoId) => {
-        setCarrito(carrito.map(item =>
-            item.id === productoId
-                ? { ...item, cantidad: item.cantidad + 1 }
-                : item
-        ));
-    };
+            if (producto.cantidad === 1) {
+                // Si la cantidad es 1, remover el producto
+                const carritoActualizado = prevCarrito.filter(item => item.id !== id);
 
-    // Disminuir cantidad de un producto
-    const disminuirCantidad = (productoId) => {
-        setCarrito(carrito.map(item => {
-            if (item.id === productoId) {
-                if (item.cantidad > 1) {
-                    return { ...item, cantidad: item.cantidad - 1 };
-                } else {
-                    return null; // Eliminar si cantidad llega a 0
-                }
+                toast.info(`🗑️ ${producto.name} removido del carrito`, {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+
+                return carritoActualizado;
+            } else {
+                // Decrementar cantidad
+                const carritoActualizado = prevCarrito.map(item =>
+                    item.id === id
+                        ? { ...item, cantidad: item.cantidad - 1 }
+                        : item
+                );
+
+                toast.info(`➖ ${producto.name} (${producto.cantidad - 1} unidades)`, {
+                    position: "top-right",
+                    autoClose: 1500,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+
+                return carritoActualizado;
             }
-            return item;
-        }).filter(item => item !== null));
+        });
     };
 
-    // Vaciar carrito
     const vaciarCarrito = () => {
         setCarrito([]);
+        toast.warning("🗑️ Carrito vaciado", {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+        });
     };
 
-    // Guardar carrito manualmente
     const guardarCarrito = () => {
-        try {
-            localStorage.setItem('carrito', JSON.stringify(carrito));
-            return { success: true, message: 'Carrito guardado exitosamente' };
-        } catch (error) {
-            return { success: false, message: 'Error al guardar el carrito' };
-        }
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+        toast.success("💾 Carrito guardado en localStorage", {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+        });
     };
 
-    // Cargar carrito desde localStorage
     const cargarCarrito = () => {
-        try {
-            const carritoGuardado = localStorage.getItem('carrito');
-            if (carritoGuardado) {
+        const carritoGuardado = localStorage.getItem('carrito');
+        if (carritoGuardado) {
+            try {
                 const carritoCargado = JSON.parse(carritoGuardado);
                 setCarrito(carritoCargado);
-                return { success: true, message: 'Carrito cargado exitosamente' };
-            } else {
-                return { success: false, message: 'No hay carrito guardado' };
+                toast.success("📂 Carrito cargado desde localStorage", {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+            } catch (error) {
+                toast.error("❌ Error al cargar el carrito", {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
             }
-        } catch (error) {
-            return { success: false, message: 'Error al cargar el carrito' };
+        } else {
+            toast.info("📂 No hay carrito guardado", {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
         }
     };
 
-    // Calcular total del carrito
-    const calcularTotal = () => {
-        return carrito.reduce((total, item) => {
-            return total + (parseFloat(item.precio || 0) * item.cantidad);
-        }, 0);
-    };
-
-    // Obtener cantidad total de productos
     const obtenerCantidadTotal = () => {
         return carrito.reduce((total, item) => total + item.cantidad, 0);
+    };
+
+    const obtenerPrecioTotal = () => {
+        return carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0);
     };
 
     return (
         <CarritoContext.Provider value={{
             carrito,
             agregarProducto,
-            eliminarProducto,
-            aumentarCantidad,
-            disminuirCantidad,
+            removerProducto,
+            incrementarCantidad,
+            decrementarCantidad,
             vaciarCarrito,
             guardarCarrito,
             cargarCarrito,
-            calcularTotal,
-            obtenerCantidadTotal
+            obtenerCantidadTotal,
+            obtenerPrecioTotal
         }}>
             {children}
         </CarritoContext.Provider>

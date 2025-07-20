@@ -1,66 +1,42 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useProductsContext } from '../context/ProductsContext';
 import FormularioProducto from './FormularioProducto';
 
-function GestionProductos() {
-    const { products, loading, error, agregarProducto, editarProducto, eliminarProducto } = useProductsContext();
-    const [modo, setModo] = useState('agregar'); // 'agregar' o 'editar'
-    const [productoParaEditar, setProductoParaEditar] = useState(null);
-    const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
+export default function GestionProductos() {
+    const { products, loading, error, addProduct, updateProduct, deleteProduct } = useProductsContext();
+    const [editingProduct, setEditingProduct] = useState(null);
+    const [showForm, setShowForm] = useState(false);
 
-    const handleAgregarProducto = async (producto) => {
-        const result = await agregarProducto(producto);
-        setMensaje({
-            tipo: result.success ? 'exito' : 'error',
-            texto: result.message
-        });
-
-        setTimeout(() => {
-            setMensaje({ tipo: '', texto: '' });
-        }, 3000);
-    };
-
-    const handleEditarProducto = async (id, producto) => {
-        const result = await editarProducto(id, producto);
-        setMensaje({
-            tipo: result.success ? 'exito' : 'error',
-            texto: result.message
-        });
-
+    const handleAddProduct = async (productData) => {
+        const result = await addProduct(productData);
         if (result.success) {
-            setModo('agregar');
-            setProductoParaEditar(null);
+            setShowForm(false);
         }
-
-        setTimeout(() => {
-            setMensaje({ tipo: '', texto: '' });
-        }, 3000);
+        return result;
     };
 
-    const handleEliminarProducto = async (id, nombre) => {
-        const confirmar = window.confirm(`¿Estás seguro de que quieres eliminar "${nombre}"?`);
-
-        if (confirmar) {
-            const result = await eliminarProducto(id);
-            setMensaje({
-                tipo: result.success ? 'exito' : 'error',
-                texto: result.message
-            });
-
-            setTimeout(() => {
-                setMensaje({ tipo: '', texto: '' });
-            }, 3000);
+    const handleUpdateProduct = async (productData) => {
+        const result = await updateProduct(editingProduct.id, productData);
+        if (result.success) {
+            setEditingProduct(null);
+            setShowForm(false);
         }
+        return result;
     };
 
-    const iniciarEdicion = (producto) => {
-        setProductoParaEditar(producto);
-        setModo('editar');
+    const handleDeleteProduct = async (id) => {
+        const result = await deleteProduct(id);
+        return result;
     };
 
-    const cancelarEdicion = () => {
-        setModo('agregar');
-        setProductoParaEditar(null);
+    const handleEdit = (product) => {
+        setEditingProduct(product);
+        setShowForm(true);
+    };
+
+    const handleCancel = () => {
+        setEditingProduct(null);
+        setShowForm(false);
     };
 
     if (loading) {
@@ -70,7 +46,8 @@ function GestionProductos() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 height: '50vh',
-                fontSize: '1.2rem'
+                fontSize: '1.2rem',
+                color: '#666'
             }}>
                 Cargando productos...
             </div>
@@ -80,20 +57,11 @@ function GestionProductos() {
     if (error) {
         return (
             <div style={{
-                maxWidth: '1200px',
-                margin: '0 auto',
+                textAlign: 'center',
                 padding: '2rem',
-                textAlign: 'center'
+                color: '#dc3545'
             }}>
-                <div style={{
-                    backgroundColor: '#f8d7da',
-                    color: '#721c24',
-                    padding: '1rem',
-                    borderRadius: '4px',
-                    border: '1px solid #f5c6cb'
-                }}>
-                    Error: {error}
-                </div>
+                Error: {error}
             </div>
         );
     }
@@ -102,136 +70,134 @@ function GestionProductos() {
         <div style={{
             maxWidth: '1200px',
             margin: '0 auto',
-            padding: '2rem'
+            padding: '2rem 1rem'
         }}>
-            <h1 style={{
-                color: '#333',
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 marginBottom: '2rem',
-                textAlign: 'center'
+                flexWrap: 'wrap',
+                gap: '1rem'
             }}>
-                Gestión de Productos
-            </h1>
+                <h1 style={{ color: '#333', margin: 0 }}>
+                    Gestión de Productos
+                </h1>
+                <button
+                    onClick={() => setShowForm(true)}
+                    style={{
+                        backgroundColor: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '1rem'
+                    }}
+                >
+                    Agregar Producto
+                </button>
+            </div>
 
-            {/* Mensaje de éxito/error */}
-            {mensaje.tipo && (
+            {showForm && (
                 <div style={{
-                    padding: '1rem',
-                    marginBottom: '2rem',
-                    borderRadius: '4px',
-                    backgroundColor: mensaje.tipo === 'exito' ? '#d4edda' : '#f8d7da',
-                    color: mensaje.tipo === 'exito' ? '#155724' : '#721c24',
-                    border: `1px solid ${mensaje.tipo === 'exito' ? '#c3e6cb' : '#f5c6cb'}`
+                    backgroundColor: '#f8f9fa',
+                    padding: '2rem',
+                    borderRadius: '8px',
+                    marginBottom: '2rem'
                 }}>
-                    {mensaje.texto}
+                    <h2 style={{ marginBottom: '1rem', color: '#333' }}>
+                        {editingProduct ? 'Editar Producto' : 'Agregar Nuevo Producto'}
+                    </h2>
+                    <FormularioProducto
+                        product={editingProduct}
+                        onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct}
+                        onCancel={handleCancel}
+                    />
                 </div>
             )}
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '2rem',
-                alignItems: 'start'
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gap: '1.5rem'
             }}>
-                <div>
-                    {modo === 'editar' && (
-                        <button
-                            onClick={cancelarEdicion}
-                            style={{
-                                backgroundColor: '#6c757d',
-                                color: 'white',
-                                border: 'none',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                marginBottom: '1rem'
-                            }}
-                        >
-                            ← Cancelar Edición
-                        </button>
-                    )}
-
-                    <FormularioProducto
-                        onAgregar={handleAgregarProducto}
-                        onEditar={handleEditarProducto}
-                        productoParaEditar={productoParaEditar}
-                        modo={modo}
-                    />
-                </div>
-
-                <div>
-                    <h3 style={{ color: '#333', marginBottom: '1rem' }}>
-                        Productos Existentes ({products.length})
-                    </h3>
-
-                    <div style={{
-                        maxHeight: '600px',
-                        overflowY: 'auto',
-                        border: '1px solid #dee2e6',
-                        borderRadius: '4px'
+                {products.map(product => (
+                    <div key={product.id} style={{
+                        border: '1px solid #e9ecef',
+                        borderRadius: '8px',
+                        padding: '1rem',
+                        backgroundColor: 'white'
                     }}>
-                        {products.length === 0 ? (
-                            <p style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
-                                No hay productos disponibles
-                            </p>
-                        ) : (
-                            products.map(producto => (
-                                <div key={producto.id} style={{
-                                    padding: '1rem',
-                                    borderBottom: '1px solid #dee2e6',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}>
-                                    <div style={{ flex: 1 }}>
-                                        <h4 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>
-                                            {producto.name}
-                                        </h4>
-                                        <p style={{ margin: '0 0 0.5rem 0', color: '#666', fontSize: '0.9rem' }}>
-                                            ${producto.precio}
-                                        </p>
-                                        <p style={{ margin: 0, color: '#666', fontSize: '0.8rem' }}>
-                                            {producto.descripcion?.substring(0, 50)}...
-                                        </p>
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <button
-                                            onClick={() => iniciarEdicion(producto)}
-                                            style={{
-                                                backgroundColor: '#ffc107',
-                                                color: 'black',
-                                                border: 'none',
-                                                padding: '0.5rem',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                fontSize: '0.8rem'
-                                            }}
-                                        >
-                                            ✏️
-                                        </button>
-                                        <button
-                                            onClick={() => handleEliminarProducto(producto.id, producto.name)}
-                                            style={{
-                                                backgroundColor: '#dc3545',
-                                                color: 'white',
-                                                border: 'none',
-                                                padding: '0.5rem',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                fontSize: '0.8rem'
-                                            }}
-                                        >
-                                            🗑️
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
-                        )}
+                        <h3 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>
+                            {product.name}
+                        </h3>
+                        <p style={{ color: '#666', margin: '0 0 1rem 0' }}>
+                            {product.descripcion}
+                        </p>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '1rem'
+                        }}>
+                            <span style={{
+                                fontSize: '1.2rem',
+                                fontWeight: 'bold',
+                                color: '#007bff'
+                            }}>
+                                ${product.precio}
+                            </span>
+                            <span style={{
+                                backgroundColor: '#28a745',
+                                color: 'white',
+                                padding: '0.25rem 0.5rem',
+                                borderRadius: '4px',
+                                fontSize: '0.8rem'
+                            }}>
+                                Stock: {product.stock || 0}
+                            </span>
+                        </div>
+                        <div style={{
+                            display: 'flex',
+                            gap: '0.5rem'
+                        }}>
+                            <button
+                                onClick={() => handleEdit(product)}
+                                style={{
+                                    backgroundColor: '#007bff',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    flex: 1
+                                }}
+                            >
+                                Editar
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                                        handleDeleteProduct(product.id);
+                                    }
+                                }}
+                                style={{
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    flex: 1
+                                }}
+                            >
+                                Eliminar
+                            </button>
+                        </div>
                     </div>
-                </div>
+                ))}
             </div>
         </div>
     );
-}
-
-export default GestionProductos; 
+} 
