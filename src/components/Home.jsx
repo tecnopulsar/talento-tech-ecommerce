@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export default function Inicio() {
+export default function Home() {
     return (
         <div style={{
             maxWidth: '1200px',
