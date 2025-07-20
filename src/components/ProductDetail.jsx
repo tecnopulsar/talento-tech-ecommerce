@@ -1,27 +1,14 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import { useCarritoContext } from '../context/CarritoContext';
+import { useProductsContext } from '../context/ProductsContext';
 
 export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
     const { agregarProducto } = useCarritoContext();
+    const { products, loading, error, obtenerProductoPorId } = useProductsContext();
 
-    useEffect(() => {
-        // Simular carga de datos
-        fetch('https://683c529028a0b0f2fdc6cd58.mockapi.io/api/products/wilson')
-            .then(res => res.json())
-            .then(data => {
-                const foundProduct = data.find(p => p.id === id);
-                setProduct(foundProduct);
-                setLoading(false);
-            })
-            .catch(() => {
-                setLoading(false);
-            });
-    }, [id]);
+    const product = obtenerProductoPorId(id);
 
     const handleAddToCart = () => {
         if (product) {
@@ -31,6 +18,7 @@ export default function ProductDetail() {
     };
 
     if (loading) return <div>Cargando producto...</div>;
+    if (error) return <div>Error al cargar productos: {error}</div>;
     if (!product) return <div>Producto no encontrado</div>;
 
     return (

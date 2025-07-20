@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function FormularioProducto({ onAgregar }) {
+function FormularioProducto({ onAgregar, onEditar, productoParaEditar = null, modo = 'agregar' }) {
     const [producto, setProducto] = useState({
         nombre: '',
         precio: '',
@@ -9,6 +9,17 @@ function FormularioProducto({ onAgregar }) {
 
     const [errores, setErrores] = useState({});
     const [loading, setLoading] = useState(false);
+
+    // Cargar datos del producto si estamos en modo editar
+    useEffect(() => {
+        if (productoParaEditar && modo === 'editar') {
+            setProducto({
+                nombre: productoParaEditar.name || '',
+                precio: productoParaEditar.precio || '',
+                descripcion: productoParaEditar.descripcion || '',
+            });
+        }
+    }, [productoParaEditar, modo]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -45,16 +56,29 @@ function FormularioProducto({ onAgregar }) {
         if (validarFormulario()) {
             setLoading(true);
             try {
-                await onAgregar(producto);
-                setProducto({ nombre: '', precio: '', descripcion: '' });
+                if (modo === 'editar' && productoParaEditar) {
+                    await onEditar(productoParaEditar.id, producto);
+                } else {
+                    await onAgregar(producto);
+                }
+
+                // Solo limpiar si es modo agregar
+                if (modo === 'agregar') {
+                    setProducto({ nombre: '', precio: '', descripcion: '' });
+                }
                 setErrores({});
             } catch (error) {
-                console.error('Error al agregar producto:', error);
+                console.error('Error al procesar producto:', error);
             } finally {
                 setLoading(false);
             }
         }
     };
+
+    const titulo = modo === 'editar' ? 'Editar Producto' : 'Agregar Producto';
+    const textoBoton = loading
+        ? (modo === 'editar' ? 'Editando producto...' : 'Agregando producto...')
+        : (modo === 'editar' ? 'Editar Producto' : 'Agregar Producto');
 
     return (
         <div style={{
@@ -70,7 +94,7 @@ function FormularioProducto({ onAgregar }) {
                 color: '#333',
                 marginBottom: '2rem'
             }}>
-                Agregar Producto
+                {titulo}
             </h2>
 
             <form onSubmit={handleSubmit}>
@@ -201,8 +225,8 @@ function FormularioProducto({ onAgregar }) {
                     disabled={loading}
                     style={{
                         width: '100%',
-                        backgroundColor: loading ? '#6c757d' : '#007bff',
-                        color: 'white',
+                        backgroundColor: loading ? '#6c757d' : (modo === 'editar' ? '#ffc107' : '#007bff'),
+                        color: loading ? 'white' : (modo === 'editar' ? 'black' : 'white'),
                         border: 'none',
                         padding: '1rem',
                         borderRadius: '4px',
@@ -212,7 +236,7 @@ function FormularioProducto({ onAgregar }) {
                         transition: 'background-color 0.2s'
                     }}
                 >
-                    {loading ? 'Agregando producto...' : 'Agregar Producto'}
+                    {textoBoton}
                 </button>
             </form>
         </div>

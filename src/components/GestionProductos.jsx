@@ -1,59 +1,102 @@
 import React, { useState } from 'react';
+import { useProductsContext } from '../context/ProductsContext';
 import FormularioProducto from './FormularioProducto';
 
 function GestionProductos() {
+    const { products, loading, error, agregarProducto, editarProducto, eliminarProducto } = useProductsContext();
+    const [modo, setModo] = useState('agregar'); // 'agregar' o 'editar'
+    const [productoParaEditar, setProductoParaEditar] = useState(null);
     const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
 
-    const agregarProducto = async (producto) => {
-        try {
-            // Usar la misma API que ya tenemos configurada
-            const respuesta = await fetch('https://683c529028a0b0f2fdc6cd58.mockapi.io/api/products/wilson', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: producto.nombre,
-                    precio: producto.precio,
-                    descripcion: producto.descripcion,
-                    marca: 'Wilson',
-                    imagen: 'not found',
-                    stock: '5'
-                }),
-            });
+    const handleAgregarProducto = async (producto) => {
+        const result = await agregarProducto(producto);
+        setMensaje({
+            tipo: result.success ? 'exito' : 'error',
+            texto: result.message
+        });
 
-            if (!respuesta.ok) {
-                throw new Error('Error al agregar el producto.');
-            }
+        setTimeout(() => {
+            setMensaje({ tipo: '', texto: '' });
+        }, 3000);
+    };
 
-            const data = await respuesta.json();
-            console.log('Producto agregado:', data);
+    const handleEditarProducto = async (id, producto) => {
+        const result = await editarProducto(id, producto);
+        setMensaje({
+            tipo: result.success ? 'exito' : 'error',
+            texto: result.message
+        });
 
+        if (result.success) {
+            setModo('agregar');
+            setProductoParaEditar(null);
+        }
+
+        setTimeout(() => {
+            setMensaje({ tipo: '', texto: '' });
+        }, 3000);
+    };
+
+    const handleEliminarProducto = async (id, nombre) => {
+        const confirmar = window.confirm(`¿Estás seguro de que quieres eliminar "${nombre}"?`);
+
+        if (confirmar) {
+            const result = await eliminarProducto(id);
             setMensaje({
-                tipo: 'exito',
-                texto: 'Producto agregado correctamente'
+                tipo: result.success ? 'exito' : 'error',
+                texto: result.message
             });
 
-            // Limpiar mensaje después de 3 segundos
             setTimeout(() => {
                 setMensaje({ tipo: '', texto: '' });
             }, 3000);
-
-        } catch (error) {
-            console.error('Error:', error.message);
-            setMensaje({
-                tipo: 'error',
-                texto: 'Hubo un problema al agregar el producto'
-            });
-
-            // Limpiar mensaje después de 3 segundos
-            setTimeout(() => {
-                setMensaje({ tipo: '', texto: '' });
-            }, 3000);
-
-            throw error; // Re-lanzar el error para que el formulario lo maneje
         }
     };
+
+    const iniciarEdicion = (producto) => {
+        setProductoParaEditar(producto);
+        setModo('editar');
+    };
+
+    const cancelarEdicion = () => {
+        setModo('agregar');
+        setProductoParaEditar(null);
+    };
+
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '50vh',
+                fontSize: '1.2rem'
+            }}>
+                Cargando productos...
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div style={{
+                maxWidth: '1200px',
+                margin: '0 auto',
+                padding: '2rem',
+                textAlign: 'center'
+            }}>
+                <div style={{
+                    backgroundColor: '#f8d7da',
+                    color: '#721c24',
+                    padding: '1rem',
+                    borderRadius: '4px',
+                    border: '1px solid #f5c6cb'
+                }}>
+                    Error: {error}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={{
@@ -90,40 +133,100 @@ function GestionProductos() {
                 alignItems: 'start'
             }}>
                 <div>
-                    <FormularioProducto onAgregar={agregarProducto} />
+                    {modo === 'editar' && (
+                        <button
+                            onClick={cancelarEdicion}
+                            style={{
+                                backgroundColor: '#6c757d',
+                                color: 'white',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                marginBottom: '1rem'
+                            }}
+                        >
+                            ← Cancelar Edición
+                        </button>
+                    )}
+
+                    <FormularioProducto
+                        onAgregar={handleAgregarProducto}
+                        onEditar={handleEditarProducto}
+                        productoParaEditar={productoParaEditar}
+                        modo={modo}
+                    />
                 </div>
 
-                <div style={{
-                    backgroundColor: '#f8f9fa',
-                    padding: '2rem',
-                    borderRadius: '8px',
-                    border: '1px solid #dee2e6'
-                }}>
+                <div>
                     <h3 style={{ color: '#333', marginBottom: '1rem' }}>
-                        Instrucciones
+                        Productos Existentes ({products.length})
                     </h3>
-                    <ul style={{ color: '#666', lineHeight: '1.6' }}>
-                        <li>Completa todos los campos obligatorios</li>
-                        <li>El precio debe ser mayor a 0</li>
-                        <li>La descripción debe tener al menos 10 caracteres</li>
-                        <li>Los productos se agregarán a la API de Wilson</li>
-                        <li>Puedes ver los productos en la página de Productos</li>
-                    </ul>
 
                     <div style={{
-                        marginTop: '2rem',
-                        padding: '1rem',
-                        backgroundColor: '#e3f2fd',
-                        borderRadius: '4px',
-                        border: '1px solid #2196f3'
+                        maxHeight: '600px',
+                        overflowY: 'auto',
+                        border: '1px solid #dee2e6',
+                        borderRadius: '4px'
                     }}>
-                        <h4 style={{ color: '#1976d2', marginBottom: '0.5rem' }}>
-                            Información de la API
-                        </h4>
-                        <p style={{ color: '#1976d2', fontSize: '0.9rem', margin: 0 }}>
-                            Los productos se envían a: <br />
-                            <strong>https://683c529028a0b0f2fdc6cd58.mockapi.io/api/products/wilson</strong>
-                        </p>
+                        {products.length === 0 ? (
+                            <p style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
+                                No hay productos disponibles
+                            </p>
+                        ) : (
+                            products.map(producto => (
+                                <div key={producto.id} style={{
+                                    padding: '1rem',
+                                    borderBottom: '1px solid #dee2e6',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <div style={{ flex: 1 }}>
+                                        <h4 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>
+                                            {producto.name}
+                                        </h4>
+                                        <p style={{ margin: '0 0 0.5rem 0', color: '#666', fontSize: '0.9rem' }}>
+                                            ${producto.precio}
+                                        </p>
+                                        <p style={{ margin: 0, color: '#666', fontSize: '0.8rem' }}>
+                                            {producto.descripcion?.substring(0, 50)}...
+                                        </p>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button
+                                            onClick={() => iniciarEdicion(producto)}
+                                            style={{
+                                                backgroundColor: '#ffc107',
+                                                color: 'black',
+                                                border: 'none',
+                                                padding: '0.5rem',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.8rem'
+                                            }}
+                                        >
+                                            ✏️
+                                        </button>
+                                        <button
+                                            onClick={() => handleEliminarProducto(producto.id, producto.name)}
+                                            style={{
+                                                backgroundColor: '#dc3545',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '0.5rem',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.8rem'
+                                            }}
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
