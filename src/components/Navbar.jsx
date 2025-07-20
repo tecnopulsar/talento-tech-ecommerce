@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 import { useCarritoContext } from '../context/CarritoContext';
-import { FaShoppingCart, FaUser, FaSignOutAlt, FaSignInAlt, FaHome, FaTableTennis, FaInfoCircle, FaEnvelope } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSignOutAlt, FaSignInAlt, FaHome, FaTableTennis, FaInfoCircle, FaEnvelope, FaCog } from 'react-icons/fa';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -60,6 +60,10 @@ export default function Navbar() {
                                 <FaUser size={16} />
                                 <span className="nav-text">{user}</span>
                             </span>
+                            <Link to="/admin" className="nav-link" aria-label="Panel de administración">
+                                <FaCog size={16} />
+                                <span className="nav-text">Admin</span>
+                            </Link>
                             <button
                                 onClick={logout}
                                 className="nav-button"

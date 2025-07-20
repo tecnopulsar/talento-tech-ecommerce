@@ -1,0 +1,74 @@
+[
+    {
+        "id": 1,
+        "name": "Raqueta Wilson Pro Staff",
+        "precio": 250000,
+        "descripcion": "Raqueta profesional de tenis con tecnología avanzada para jugadores de alto rendimiento. Peso balanceado y excelente control.",
+        "categoria": "Raquetas",
+        "stock": 15,
+        "imagen": "https://images.unsplash.com/photo-1551699848-9b2f5d1c4121?w=300&h=200&fit=crop"
+    },
+    {
+        "id": 2,
+        "name": "Pelotas Wilson Championship",
+        "precio": 25000,
+        "descripcion": "Pack de 3 pelotas de tenis de alta calidad para torneos y entrenamiento profesional.",
+        "categoria": "Pelotas",
+        "stock": 50,
+        "imagen": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&h=200&fit=crop"
+    },
+    {
+        "id": 3,
+        "name": "Grip Wilson Overgrip",
+        "precio": 13000,
+        "descripcion": "Overgrip absorbente de humedad para mejor agarre y comodidad durante el juego.",
+        "categoria": "Accesorios",
+        "stock": 100,
+        "imagen": "https://images.unsplash.com/photo-1551699848-9b2f5d1c4121?w=300&h=200&fit=crop"
+    },
+    {
+        "id": 4,
+        "name": "Zapatos Wilson Court",
+        "precio": 90000,
+        "descripcion": "Zapatos de tenis con excelente soporte y amortiguación para máximo rendimiento en la cancha.",
+        "categoria": "Zapatos",
+        "stock": 25,
+        "imagen": "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop"
+    },
+    {
+        "id": 5,
+        "name": "Raqueta Wilson Blade",
+        "precio": 250000,
+        "descripcion": "Raqueta intermedia perfecta para jugadores que buscan control y potencia balanceados.",
+        "categoria": "Raquetas",
+        "stock": 20,
+        "imagen": "https://images.unsplash.com/photo-1551699848-9b2f5d1c4121?w=300&h=200&fit=crop"
+    },
+    {
+        "id": 6,
+        "name": "Camiseta Wilson Performance",
+        "precio": 35000,
+        "descripcion": "Camiseta deportiva de alta tecnología con tejido transpirable para máximo confort.",
+        "categoria": "Ropa",
+        "stock": 40,
+        "imagen": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=200&fit=crop"
+    },
+    {
+        "id": 7,
+        "name": "Pelotas Wilson Practice",
+        "precio": 20000,
+        "descripcion": "Pack de 4 pelotas de entrenamiento ideales para práctica diaria y desarrollo de habilidades.",
+        "categoria": "Pelotas",
+        "stock": 75,
+        "imagen": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&h=200&fit=crop"
+    },
+    {
+        "id": 8,
+        "name": "Mochila Wilson Tour",
+        "precio": 59999,
+        "descripcion": "Mochila deportiva con compartimentos especializados para raquetas y accesorios de tenis.",
+        "categoria": "Accesorios",
+        "stock": 30,
+        "imagen": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=200&fit=crop"
+    }
+]

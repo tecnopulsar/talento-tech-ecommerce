@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const ProductsContext = createContext();
 
@@ -8,7 +8,7 @@ export function ProductsProvider({ children }) {
     const [error, setError] = useState(null);
 
     // Función para cargar productos con mejor manejo de errores
-    const loadProducts = useCallback(async () => {
+    const loadProducts = async () => {
         try {
             setLoading(true);
             setError(null);
@@ -43,10 +43,10 @@ export function ProductsProvider({ children }) {
         } finally {
             setLoading(false);
         }
-    }, []);
+    };
 
     // Función para agregar producto
-    const addProduct = useCallback(async (productData) => {
+    const addProduct = async (productData) => {
         try {
             const response = await fetch('https://64c8c4a1dbb0a235bb9c7831.mockapi.io/products', {
                 method: 'POST',
@@ -68,10 +68,10 @@ export function ProductsProvider({ children }) {
             console.error('Error agregando producto:', error);
             return { success: false, message: error.message || 'Error al agregar producto' };
         }
-    }, []);
+    };
 
     // Función para actualizar producto
-    const updateProduct = useCallback(async (id, productData) => {
+    const updateProduct = async (id, productData) => {
         try {
             const response = await fetch(`https://64c8c4a1dbb0a235bb9c7831.mockapi.io/products/${id}`, {
                 method: 'PUT',
@@ -95,10 +95,10 @@ export function ProductsProvider({ children }) {
             console.error('Error actualizando producto:', error);
             return { success: false, message: error.message || 'Error al actualizar producto' };
         }
-    }, []);
+    };
 
     // Función para eliminar producto
-    const deleteProduct = useCallback(async (id) => {
+    const deleteProduct = async (id) => {
         try {
             const response = await fetch(`https://64c8c4a1dbb0a235bb9c7831.mockapi.io/products/${id}`, {
                 method: 'DELETE',
@@ -115,17 +115,17 @@ export function ProductsProvider({ children }) {
             console.error('Error eliminando producto:', error);
             return { success: false, message: error.message || 'Error al eliminar producto' };
         }
-    }, []);
+    };
 
     // Función para recargar productos
-    const refreshProducts = useCallback(() => {
+    const refreshProducts = () => {
         loadProducts();
-    }, [loadProducts]);
+    };
 
     // Cargar productos al montar el componente
     useEffect(() => {
         loadProducts();
-    }, [loadProducts]);
+    }, []);
 
     return (
         <ProductsContext.Provider value={{

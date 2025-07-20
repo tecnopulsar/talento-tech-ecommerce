@@ -1,13 +1,16 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useCarritoContext } from '../context/CarritoContext';
 import { useProductsContext } from '../context/ProductsContext';
+import { useAuthContext } from '../context/AuthContext';
 import ProductCard from './ProductCard';
 import Pagination from './Pagination';
-import { FaSearch, FaFilter, FaTimes, FaSort } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaTimes, FaSort, FaCog } from 'react-icons/fa';
 
 export default function ProductList() {
     const { agregarProducto } = useCarritoContext();
     const { products, loading, error } = useProductsContext();
+    const { user } = useAuthContext();
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('name');
@@ -31,61 +34,56 @@ export default function ProductList() {
     }, [searchTerm, sortBy, categoryFilter, priceRange]);
 
     // Obtener categorías únicas
-    const categories = useMemo(() => {
-        const cats = [...new Set(products.map(p => p.categoria).filter(Boolean))];
-        return cats.sort();
-    }, [products]);
+    const categories = [...new Set(products.map(p => p.categoria).filter(Boolean))].sort();
 
-    // Filtrar y ordenar productos usando useMemo para mejor rendimiento
-    const filteredAndSortedProducts = useMemo(() => {
-        let filtered = products.filter(product => {
-            const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.descripcion?.toLowerCase().includes(searchTerm.toLowerCase());
+    // Filtrar productos por búsqueda y filtros
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.descripcion?.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const matchesCategory = categoryFilter === 'all' ||
-                product.categoria?.toLowerCase() === categoryFilter.toLowerCase();
+        const matchesCategory = categoryFilter === 'all' ||
+            product.categoria?.toLowerCase() === categoryFilter.toLowerCase();
 
-            const matchesPrice = (!priceRange.min || product.precio >= parseFloat(priceRange.min)) &&
-                (!priceRange.max || product.precio <= parseFloat(priceRange.max));
+        const matchesPrice = (!priceRange.min || product.precio >= parseFloat(priceRange.min)) &&
+            (!priceRange.max || product.precio <= parseFloat(priceRange.max));
 
-            return matchesSearch && matchesCategory && matchesPrice;
-        });
+        return matchesSearch && matchesCategory && matchesPrice;
+    });
 
-        // Ordenar productos
-        return filtered.sort((a, b) => {
-            switch (sortBy) {
-                case 'name':
-                    return a.name.localeCompare(b.name);
-                case 'price-asc':
-                    return a.precio - b.precio;
-                case 'price-desc':
-                    return b.precio - a.precio;
-                case 'newest':
-                    return new Date(b.fechaCreacion || 0) - new Date(a.fechaCreacion || 0);
-                default:
-                    return 0;
-            }
-        });
-    }, [products, searchTerm, sortBy, categoryFilter, priceRange]);
+    // Ordenar productos
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        switch (sortBy) {
+            case 'name':
+                return a.name.localeCompare(b.name);
+            case 'price-asc':
+                return a.precio - b.precio;
+            case 'price-desc':
+                return b.precio - a.precio;
+            case 'newest':
+                return 0; // Ordenamiento por defecto ya que no hay fecha de creación
+            default:
+                return 0;
+        }
+    });
 
     // Calcular productos para la página actual
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentProducts = filteredAndSortedProducts.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(filteredAndSortedProducts.length / itemsPerPage);
+    const currentProducts = sortedProducts.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
 
-    const handlePageChange = useCallback((page) => {
+    const handlePageChange = (page) => {
         setCurrentPage(page);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, []);
+    };
 
-    const clearFilters = useCallback(() => {
+    const clearFilters = () => {
         setSearchTerm('');
         setSortBy('name');
         setCategoryFilter('all');
         setPriceRange({ min: '', max: '' });
         setCurrentPage(1);
-    }, []);
+    };
 
     const hasActiveFilters = searchTerm || sortBy !== 'name' || categoryFilter !== 'all' ||
         priceRange.min || priceRange.max;
@@ -152,14 +150,46 @@ export default function ProductList() {
             <div style={{
                 marginBottom: '2rem'
             }}>
-                <h1 style={{
-                    color: '#333',
-                    textAlign: 'center',
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                     marginBottom: '1.5rem',
-                    fontSize: 'clamp(1.5rem, 4vw, 2rem)'
+                    flexWrap: 'wrap',
+                    gap: '1rem'
                 }}>
-                    🎾 Productos de Tenis
-                </h1>
+                    <h1 style={{
+                        color: '#333',
+                        margin: 0,
+                        fontSize: 'clamp(1.5rem, 4vw, 2rem)'
+                    }}>
+                        🎾 Productos de Tenis
+                    </h1>
+
+                    {/* Botón de gestión para admin */}
+                    {user && (
+                        <Link
+                            to="/gestion-productos"
+                            style={{
+                                backgroundColor: '#28a745',
+                                color: 'white',
+                                border: 'none',
+                                padding: '0.75rem 1.5rem',
+                                borderRadius: '6px',
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontSize: '0.9rem',
+                                fontWeight: '500',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <FaCog size={14} />
+                            Gestionar Productos
+                        </Link>
+                    )}
+                </div>
 
                 {/* Barra de búsqueda principal */}
                 <div style={{
@@ -302,7 +332,6 @@ export default function ProductList() {
                             <option value="name">Ordenar por nombre</option>
                             <option value="price-asc">Precio: menor a mayor</option>
                             <option value="price-desc">Precio: mayor a menor</option>
-                            <option value="newest">Más recientes</option>
                         </select>
                     </div>
 
@@ -376,12 +405,12 @@ export default function ProductList() {
                 }}>
                     {hasActiveFilters ? (
                         <>
-                            Mostrando {currentProducts.length} de {filteredAndSortedProducts.length} productos
+                            Mostrando {currentProducts.length} de {sortedProducts.length} productos
                             {searchTerm && ` para "${searchTerm}"`}
                             {categoryFilter !== 'all' && ` en categoría "${categoryFilter}"`}
                         </>
                     ) : (
-                        `Mostrando ${currentProducts.length} de ${filteredAndSortedProducts.length} productos`
+                        `Mostrando ${currentProducts.length} de ${sortedProducts.length} productos`
                     )}
                 </div>
             </div>

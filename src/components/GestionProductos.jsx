@@ -73,41 +73,49 @@ export default function GestionProductos() {
             padding: '2rem 1rem'
         }}>
             <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '2rem',
-                flexWrap: 'wrap',
-                gap: '1rem'
+                textAlign: 'center',
+                marginBottom: '2rem'
             }}>
-                <h1 style={{ color: '#333', margin: 0 }}>
-                    Gestión de Productos
+                <h1 style={{ color: '#333', marginBottom: '1rem' }}>
+                    📦 Gestión de Productos
                 </h1>
+                <p style={{ color: '#666', marginBottom: '2rem' }}>
+                    Agrega nuevos productos al catálogo de Wilson Store
+                </p>
                 <button
                     onClick={() => setShowForm(true)}
                     style={{
                         backgroundColor: '#28a745',
                         color: 'white',
                         border: 'none',
-                        padding: '0.75rem 1.5rem',
+                        padding: '1rem 2rem',
                         borderRadius: '6px',
                         cursor: 'pointer',
-                        fontSize: '1rem'
+                        fontSize: '1.1rem',
+                        fontWeight: 'bold',
+                        transition: 'all 0.2s ease'
                     }}
                 >
-                    Agregar Producto
+                    ➕ Agregar Nuevo Producto
                 </button>
             </div>
 
             {showForm && (
                 <div style={{
-                    backgroundColor: '#f8f9fa',
+                    backgroundColor: 'white',
                     padding: '2rem',
-                    borderRadius: '8px',
-                    marginBottom: '2rem'
+                    borderRadius: '12px',
+                    marginBottom: '2rem',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    border: '1px solid #e9ecef'
                 }}>
-                    <h2 style={{ marginBottom: '1rem', color: '#333' }}>
-                        {editingProduct ? 'Editar Producto' : 'Agregar Nuevo Producto'}
+                    <h2 style={{
+                        marginBottom: '1.5rem',
+                        color: '#333',
+                        textAlign: 'center',
+                        fontSize: '1.5rem'
+                    }}>
+                        {editingProduct ? '✏️ Editar Producto' : '➕ Agregar Nuevo Producto'}
                     </h2>
                     <FormularioProducto
                         product={editingProduct}
@@ -117,87 +125,7 @@ export default function GestionProductos() {
                 </div>
             )}
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '1.5rem'
-            }}>
-                {products.map(product => (
-                    <div key={product.id} style={{
-                        border: '1px solid #e9ecef',
-                        borderRadius: '8px',
-                        padding: '1rem',
-                        backgroundColor: 'white'
-                    }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>
-                            {product.name}
-                        </h3>
-                        <p style={{ color: '#666', margin: '0 0 1rem 0' }}>
-                            {product.descripcion}
-                        </p>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '1rem'
-                        }}>
-                            <span style={{
-                                fontSize: '1.2rem',
-                                fontWeight: 'bold',
-                                color: '#007bff'
-                            }}>
-                                ${product.precio}
-                            </span>
-                            <span style={{
-                                backgroundColor: '#28a745',
-                                color: 'white',
-                                padding: '0.25rem 0.5rem',
-                                borderRadius: '4px',
-                                fontSize: '0.8rem'
-                            }}>
-                                Stock: {product.stock || 0}
-                            </span>
-                        </div>
-                        <div style={{
-                            display: 'flex',
-                            gap: '0.5rem'
-                        }}>
-                            <button
-                                onClick={() => handleEdit(product)}
-                                style={{
-                                    backgroundColor: '#007bff',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '0.5rem 1rem',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    flex: 1
-                                }}
-                            >
-                                Editar
-                            </button>
-                            <button
-                                onClick={() => {
-                                    if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-                                        handleDeleteProduct(product.id);
-                                    }
-                                }}
-                                style={{
-                                    backgroundColor: '#dc3545',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '0.5rem 1rem',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    flex: 1
-                                }}
-                            >
-                                Eliminar
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+
         </div>
     );
 } 
